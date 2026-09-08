@@ -18,25 +18,93 @@ type OnboardingContextValue = {
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
+function isCompletedAt(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function readStoredProfile(value: unknown): { profile: OnboardingProfile | null; migrated: boolean } {
+  if (!value || typeof value !== 'object') return { profile: null, migrated: false };
+
+  const stored = value as Record<string, unknown>;
+  if (stored.mode === 'independent' && isCompletedAt(stored.completedAt)) {
+    return {
+      profile: { mode: 'independent', completedAt: stored.completedAt },
+      migrated: false,
+    };
+  }
+
+  if (
+    stored.mode === 'institution' &&
+    typeof stored.institutionId === 'string' &&
+    stored.institutionId.trim() &&
+    isCompletedAt(stored.completedAt)
+  ) {
+    return {
+      profile: {
+        mode: 'institution',
+        institutionId: stored.institutionId.trim(),
+        completedAt: stored.completedAt,
+      },
+      migrated: false,
+    };
+  }
+
+  if (
+    stored.mode === 'school' &&
+    typeof stored.schoolId === 'string' &&
+    stored.schoolId.trim() &&
+    isCompletedAt(stored.completedAt)
+  ) {
+    return {
+      profile: {
+        mode: 'institution',
+        institutionId: stored.schoolId.trim(),
+        completedAt: stored.completedAt,
+      },
+      migrated: true,
+    };
+  }
+
+  return { profile: null, migrated: false };
+}
+
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<OnboardingProfile | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(ONBOARDING_KEY)
-      .then((stored) => {
+    let active = true;
+
+    const hydrate = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(ONBOARDING_KEY);
         if (!stored) return;
-        const parsed = JSON.parse(stored) as OnboardingProfile;
-        if (parsed.mode === 'independent' && typeof parsed.completedAt === 'number') {
-          setProfile(parsed);
-        } else {
-          const legacy = parsed as unknown as LegacyOnboardingProfile;
-          if (legacy.mode === 'school' && typeof legacy.schoolId === 'string' && typeof legacy.completedAt === 'number') {
-            setProfile({ mode: 'institution', institutionId: legacy.schoolId, completedAt: legacy.completedAt });
-          }
+
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(stored);
+        } catch {
+          return;
         }
-      })
-      .finally(() => setHydrated(true));
+
+        const { profile: storedProfile, migrated } = readStoredProfile(parsed);
+        if (!storedProfile || !active) return;
+
+        setProfile(storedProfile);
+        if (migrated) {
+          await AsyncStorage.setItem(ONBOARDING_KEY, JSON.stringify(storedProfile));
+        }
+      } catch {
+        // Treat storage failures and malformed profiles as incomplete onboarding.
+      } finally {
+        if (active) setHydrated(true);
+      }
+    };
+
+    void hydrate();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const saveProfile = useCallback(async (nextProfile: OnboardingProfile) => {

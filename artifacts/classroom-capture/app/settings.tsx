@@ -8,11 +8,12 @@ import { useCaptures } from '@/context/CaptureContext';
 import { useOnboarding } from '@/context/OnboardingContext';
 import { ensureTempFolder } from '@/lib/drive';
 import { useColors } from '@/hooks/useColors';
+import { t, type TranslationKey } from '@/lib/i18n';
 
-const OPTIONS = [
-  { value: 1, label: 'After 1 hour', note: 'Best for sensitive moments' },
-  { value: 24, label: 'After 24 hours', note: 'Recommended for an institution day' },
-  { value: 72, label: 'After 3 days', note: 'Keep a little longer for review' },
+const OPTIONS: Array<{ value: number; label: TranslationKey; note: TranslationKey }> = [
+  { value: 1, label: 'afterOneHour', note: 'sensitiveMoments' },
+  { value: 24, label: 'afterOneDay', note: 'recommendedInstitutionDay' },
+  { value: 72, label: 'afterThreeDays', note: 'keepLongerReview' },
 ];
 
 export default function SettingsScreen() {
@@ -27,9 +28,9 @@ export default function SettingsScreen() {
     setConnecting(true);
     try {
       await ensureTempFolder();
-      Alert.alert('Google Drive connected', 'Your private temporary folder is ready.');
+       Alert.alert(t('googleDriveConnected'), t('temporaryFolderReady'));
     } catch (error) {
-      Alert.alert('Could not connect', error instanceof Error ? error.message : 'Try again shortly.');
+      Alert.alert(t('couldNotConnect'), error instanceof Error ? error.message : t('tryAgainShortly'));
     } finally {
       setConnecting(false);
     }
@@ -38,16 +39,16 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 30 }]}>
-        <View style={styles.header}><Pressable onPress={() => router.back()} style={[styles.backButton, { backgroundColor: colors.card }]}><Feather name="arrow-left" size={20} color={colors.foreground} /></Pressable><AppMark /></View>
-        <View style={styles.intro}><Text style={[styles.title, { color: colors.foreground }]}>Settings</Text><Text style={[styles.subtitle, { color: colors.mutedForeground }]}>You’re in control of how long classroom photos stay on this device.</Text></View>
+        <View style={styles.header}><Pressable onPress={() => router.back()} style={[styles.backButton, { backgroundColor: colors.card }]}><Feather name="arrow-right" size={20} color={colors.foreground} /></Pressable><AppMark /></View>
+        <View style={styles.intro}><Text style={[styles.title, { color: colors.foreground }]}>{t('settings')}</Text><Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{t('settingsSubtitle')}</Text></View>
 
-        <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Temporary photo cleanup</Text><Text style={[styles.sectionText, { color: colors.mutedForeground }]}>Photos are stored in the app cache only. Once this window passes, the local copy is deleted automatically.</Text><View style={styles.options}>{OPTIONS.map((option) => <Pressable key={option.value} testID={`cleanup-${option.value}`} onPress={() => void setCleanupHours(option.value)} style={[styles.option, { backgroundColor: colors.card, borderColor: cleanupHours === option.value ? colors.primary : colors.border }]}><View style={[styles.radio, { borderColor: cleanupHours === option.value ? colors.primary : colors.border }]}>{cleanupHours === option.value ? <View style={[styles.radioInner, { backgroundColor: colors.primary }]} /> : null}</View><View style={styles.optionCopy}><Text style={[styles.optionLabel, { color: colors.foreground }]}>{option.label}</Text><Text style={[styles.optionNote, { color: colors.mutedForeground }]}>{option.note}</Text></View></Pressable>)}</View></View>
+        <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('temporaryPhotoCleanup')}</Text><Text style={[styles.sectionText, { color: colors.mutedForeground }]}>{t('cleanupDescription')}</Text><View style={styles.options}>{OPTIONS.map((option) => <Pressable key={option.value} testID={`cleanup-${option.value}`} onPress={() => void setCleanupHours(option.value)} style={[styles.option, { backgroundColor: colors.card, borderColor: cleanupHours === option.value ? colors.primary : colors.border }]}><View style={[styles.radio, { borderColor: cleanupHours === option.value ? colors.primary : colors.border }]}>{cleanupHours === option.value ? <View style={[styles.radioInner, { backgroundColor: colors.primary }]} /> : null}</View><View style={styles.optionCopy}><Text style={[styles.optionLabel, { color: colors.foreground }]}>{t(option.label)}</Text><Text style={[styles.optionNote, { color: colors.mutedForeground }]}>{t(option.note)}</Text></View></Pressable>)}</View></View>
 
         <View style={styles.section}>
           <View style={styles.toggleHeader}>
             <View style={styles.toggleCopy}>
-              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Delete imported photos after upload</Text>
-              <Text style={[styles.sectionText, { color: colors.mutedForeground }]}>When enabled, imported gallery photos are removed from this device after they upload successfully to Drive.</Text>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('deleteImportedAfterUpload')}</Text>
+              <Text style={[styles.sectionText, { color: colors.mutedForeground }]}>{t('deleteImportedDescription')}</Text>
             </View>
             <Switch
               testID="delete-imported-after-upload-toggle"
@@ -58,27 +59,27 @@ export default function SettingsScreen() {
             />
           </View>
           <Text style={[styles.deletionNote, { color: colors.mutedForeground }]}>
-            Note: Deletion only applies to photos stored locally on this device. Photos hosted only on cloud services like Google Photos or iCloud cloud backup cannot be automatically deleted from the cloud.
+             {t('deletionNote')}
           </Text>
         </View>
 
-        <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Google Drive</Text><Text style={[styles.sectionText, { color: colors.mutedForeground }]}>Google sign-in is used only for Drive sync. There is no separate XmiX password.</Text><Pressable testID="settings-connect-drive" onPress={connect} disabled={connecting} style={[styles.connectButton, { backgroundColor: colors.secondary }]}><Feather name="cloud" size={18} color={colors.primary} /><Text style={[styles.connectButtonText, { color: colors.foreground }]}>{connecting ? 'Connecting…' : 'Connect Google Drive'}</Text><Feather name="arrow-up-right" size={16} color={colors.primary} /></Pressable></View>
+        <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('googleDrive')}</Text><Text style={[styles.sectionText, { color: colors.mutedForeground }]}>{t('googleDriveOnly')}</Text><Pressable testID="settings-connect-drive" onPress={connect} disabled={connecting} style={[styles.connectButton, { backgroundColor: colors.secondary }]}><Feather name="cloud" size={18} color={colors.primary} /><Text style={[styles.connectButtonText, { color: colors.foreground }]}>{connecting ? t('connecting') : t('connectGoogleDrive')}</Text><Feather name="arrow-up-right" size={16} color={colors.primary} /></Pressable></View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Institution workspace</Text>
+           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('institutionWorkspaceSettings')}</Text>
           <Text style={[styles.sectionText, { color: colors.mutedForeground }]}>
             {profile?.mode === 'institution'
-              ? 'This device is linked to an institution. Enter another activation code to change institutions.'
-              : 'This device is currently independent. Enter an institution activation code when you are ready to link it.'}
+               ? t('linkedInstitutionChange')
+               : t('independentLink')}
           </Text>
           <Pressable testID="settings-link-institution" onPress={() => router.push('/join')} style={[styles.connectButton, { backgroundColor: colors.secondary }]}>
             <Feather name="users" size={18} color={colors.primary} />
-            <Text style={[styles.connectButtonText, { color: colors.foreground }]}>{profile?.mode === 'institution' ? 'Change institution' : 'Link to institution'}</Text>
+             <Text style={[styles.connectButtonText, { color: colors.foreground }]}>{profile?.mode === 'institution' ? t('changeInstitution') : t('linkInstitution')}</Text>
             <Feather name="arrow-up-right" size={16} color={colors.primary} />
           </Pressable>
         </View>
 
-        <View style={[styles.footerNote, { backgroundColor: colors.accent }]}><Feather name="shield" size={17} color={colors.accentForeground} /><Text style={[styles.footerText, { color: colors.accentForeground }]}>Your photos never enter the native Camera Roll unless you explicitly save them outside this app.</Text></View>
+        <View style={[styles.footerNote, { backgroundColor: colors.accent }]}><Feather name="shield" size={17} color={colors.accentForeground} /><Text style={[styles.footerText, { color: colors.accentForeground }]}>{t('photosNeverCameraRoll')}</Text></View>
       </ScrollView>
     </View>
   );

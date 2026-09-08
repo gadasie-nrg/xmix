@@ -7,8 +7,9 @@ import { AppMark } from '@/components/AppMark';
 import { CaptureTile } from '@/components/CaptureTile';
 import { useCaptures } from '@/context/CaptureContext';
 import { useOnboarding } from '@/context/OnboardingContext';
-import { ensureTempFolder } from '@/lib/drive';
+import { ensureTempFolder, hasConnectedTempFolder } from '@/lib/drive';
 import { useColors } from '@/hooks/useColors';
+import { t } from '@/lib/i18n';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     void cleanupExpired();
+    void hasConnectedTempFolder().then(setDriveReady);
   }, []);
 
   if (!hydrated) {
@@ -39,7 +41,7 @@ export default function HomeScreen() {
       await ensureTempFolder();
       setDriveReady(true);
     } catch (error) {
-      Alert.alert('Google Drive unavailable', error instanceof Error ? error.message : 'Try again in a moment.');
+      Alert.alert(t('googleDriveUnavailable'), error instanceof Error ? error.message : t('tryAgainMoment'));
     } finally {
       setConnecting(false);
     }
@@ -63,10 +65,10 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.intro}>
-          <Text style={[styles.eyebrow, { color: colors.primary }]}>PRIVATE BY DEFAULT</Text>
-          <Text style={[styles.title, { color: colors.foreground }]}>Keep the moment.{'\n'}Not the clutter.</Text>
+          <Text style={[styles.eyebrow, { color: colors.primary }]}>{t('privateByDefault')}</Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>{t('keepTheMoment')}{'\n'}{t('notTheClutter')}</Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            Capture classroom moments safely. Photos stay in this app until you decide where they go.
+            {t('captureSafely')}
           </Text>
         </View>
 
@@ -76,10 +78,10 @@ export default function HomeScreen() {
           </View>
           <View style={styles.workspaceCopy}>
             <Text style={[styles.workspaceTitle, { color: colors.foreground }]}>
-              {profile.mode === 'institution' ? 'Institution workspace' : 'Independent workspace'}
+              {profile.mode === 'institution' ? t('institutionWorkspace') : t('independentWorkspace')}
             </Text>
             <Text style={[styles.workspaceDescription, { color: colors.mutedForeground }]}>
-                {profile.mode === 'institution' ? 'Your institution invite is connected.' : 'Private capture. Activate with a manager code when ready.'}
+                {profile.mode === 'institution' ? t('institutionInviteConnected') : t('privateCaptureActivate')}
             </Text>
           </View>
             {profile.mode === 'institution' ? (
@@ -90,7 +92,7 @@ export default function HomeScreen() {
                 onPress={() => router.push('/join')}
                 style={({ pressed }) => [styles.activateButton, { backgroundColor: colors.card, opacity: pressed ? 0.7 : 1 }]}
               >
-                <Text style={[styles.activateButtonText, { color: colors.primary }]}>Activate</Text>
+                <Text style={[styles.activateButtonText, { color: colors.primary }]}>{t('activate')}</Text>
                 <Feather name="arrow-up-right" size={14} color={colors.primary} />
               </Pressable>
             )}
@@ -105,39 +107,37 @@ export default function HomeScreen() {
             <Feather name="camera" size={25} color={colors.primaryForeground} />
           </View>
           <View style={styles.cameraCopy}>
-            <Text style={[styles.cameraLabel, { color: colors.primaryForeground }]}>Open camera</Text>
-            <Text style={[styles.cameraHint, { color: 'rgba(255,255,255,0.72)' }]}>Photos won’t enter your gallery</Text>
+            <Text style={[styles.cameraLabel, { color: colors.primaryForeground }]}>{t('openCamera')}</Text>
+            <Text style={[styles.cameraHint, { color: 'rgba(255,255,255,0.72)' }]}>{t('photosStayOutOfGallery')}</Text>
           </View>
           <Feather name="arrow-up-right" size={22} color={colors.primaryForeground} />
         </Pressable>
 
-        <View style={[styles.driveCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={[styles.driveBadge, { backgroundColor: driveReady ? colors.secondary : colors.accent }]}>
-            <Feather name="cloud" size={18} color={driveReady ? colors.primary : colors.accentForeground} />
+        {!driveReady ? (
+          <View style={[styles.driveCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.driveBadge, { backgroundColor: colors.accent }]}>
+              <Feather name="cloud" size={18} color={colors.accentForeground} />
+            </View>
+            <View style={styles.driveCopy}>
+              <Text style={[styles.driveTitle, { color: colors.foreground }]}>{t('setUpDriveSync')}</Text>
+              <Text style={[styles.driveDescription, { color: colors.mutedForeground }]}>{t('privateStagingFolder')}</Text>
+            </View>
+            <Pressable testID="connect-drive-button" onPress={connectDrive} disabled={connecting}>
+              <Text style={[styles.link, { color: colors.primary }]}>{connecting ? '...' : t('connect')}</Text>
+            </Pressable>
           </View>
-          <View style={styles.driveCopy}>
-            <Text style={[styles.driveTitle, { color: colors.foreground }]}>
-              {driveReady ? 'Google Drive is ready' : 'Set up private Drive sync'}
-            </Text>
-            <Text style={[styles.driveDescription, { color: colors.mutedForeground }]}>
-              {driveReady ? 'Temporary folder connected for this session.' : 'A private staging folder keeps captures safe before sharing.'}
-            </Text>
-          </View>
-          <Pressable testID="connect-drive-button" onPress={connectDrive} disabled={connecting}>
-            <Text style={[styles.link, { color: colors.primary }]}>{connecting ? '...' : driveReady ? 'Ready' : 'Connect'}</Text>
-          </Pressable>
-        </View>
+        ) : null}
 
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Recent captures</Text>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('recentCaptures')}</Text>
             <Text style={[styles.sectionMeta, { color: colors.mutedForeground }]}>
-              {captures.length ? `${captures.length} photo${captures.length === 1 ? '' : 's'} in your workspace` : 'Nothing saved yet'}
+              {captures.length ? t('photosInWorkspace', { count: captures.length }) : t('nothingSavedYet')}
             </Text>
           </View>
           {captures.length ? (
             <Pressable testID="review-button" onPress={() => router.push('/review')}>
-              <Text style={[styles.link, { color: colors.primary }]}>Review all</Text>
+              <Text style={[styles.link, { color: colors.primary }]}>{t('reviewAll')}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -151,14 +151,14 @@ export default function HomeScreen() {
             <View style={[styles.emptyIcon, { backgroundColor: colors.secondary }]}>
               <Feather name="image" size={21} color={colors.primary} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Your classroom moments will land here</Text>
-            <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>Open the camera when something worth remembering happens.</Text>
+            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>{t('momentsWillLandHere')}</Text>
+            <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>{t('openCameraWhen')}</Text>
           </View>
         )}
 
         <View style={[styles.privacyNote, { borderTopColor: colors.border }]}>
-          <Feather name="lock" size={15} color={colors.mutedForeground} />
-          <Text style={[styles.privacyText, { color: colors.mutedForeground }]}>No native Camera Roll access. Local copies expire automatically.</Text>
+          <Feather name={driveReady ? 'cloud' : 'lock'} size={15} color={colors.mutedForeground} />
+          <Text style={[styles.privacyText, { color: colors.mutedForeground }]}>{driveReady ? t('temporaryPhotosKeptInDrive') : t('localCopiesExpire')}</Text>
         </View>
       </ScrollView>
     </View>

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppMark } from '@/components/AppMark';
 import { useOnboarding } from '@/context/OnboardingContext';
 import { useColors } from '@/hooks/useColors';
+import { t } from '@/lib/i18n';
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -34,10 +35,10 @@ export default function OnboardingScreen() {
         <AppMark />
 
         <View style={styles.intro}>
-          <Text style={[styles.eyebrow, { color: colors.primary }]}>WELCOME TO XMIX</Text>
-          <Text style={[styles.title, { color: colors.foreground }]}>A private place for classroom moments.</Text>
+          <Text style={[styles.eyebrow, { color: colors.primary }]}>{t('welcomeToXmix')}</Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>{t('privateClassroomMoments')}</Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            Choose how you’ll use XmiX. You can capture and share privately either way.
+            {t('chooseHowUse')}
           </Text>
         </View>
 
@@ -54,9 +55,9 @@ export default function OnboardingScreen() {
               <Feather name="users" size={22} color={colors.primaryForeground} />
             </View>
             <View style={styles.optionCopy}>
-              <Text style={[styles.optionTitle, { color: colors.primaryForeground }]}>Join your institution</Text>
+              <Text style={[styles.optionTitle, { color: colors.primaryForeground }]}>{t('joinYourInstitution')}</Text>
               <Text style={[styles.optionDescription, { color: 'rgba(255,255,255,0.76)' }]}>
-                Enter the code from your institution manager to connect to its workspace.
+                {t('enterManagerCode')}
               </Text>
             </View>
             <Feather name="arrow-up-right" size={20} color={colors.primaryForeground} />
@@ -75,19 +76,19 @@ export default function OnboardingScreen() {
               <Feather name="camera" size={22} color={colors.primary} />
             </View>
             <View style={styles.optionCopy}>
-              <Text style={[styles.optionTitle, { color: colors.foreground }]}>Use XmiX independently</Text>
+              <Text style={[styles.optionTitle, { color: colors.foreground }]}>{t('useIndependently')}</Text>
               <Text style={[styles.optionDescription, { color: colors.mutedForeground }]}>
-                Start privately now. Activate later with an institution code when you’re ready.
+                {t('startPrivately')}
               </Text>
             </View>
-            <Feather name="arrow-right" size={20} color={colors.mutedForeground} />
+            <Feather name="arrow-left" size={20} color={colors.mutedForeground} />
           </Pressable>
         </View>
 
         <View style={[styles.note, { borderTopColor: colors.border }]}>
           <Feather name="shield" size={16} color={colors.mutedForeground} />
           <Text style={[styles.noteText, { color: colors.mutedForeground }]}>
-            No password is needed. Google sign-in is only used when you choose to connect Drive.
+            {t('noPasswordGoogle')}
           </Text>
         </View>
       </ScrollView>

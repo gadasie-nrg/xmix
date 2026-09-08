@@ -8,6 +8,7 @@ import { AppMark } from '@/components/AppMark';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { useOnboarding } from '@/context/OnboardingContext';
 import { useColors } from '@/hooks/useColors';
+import { t } from '@/lib/i18n';
 
 export default function JoinInstitutionScreen() {
   const router = useRouter();
@@ -36,11 +37,11 @@ export default function JoinInstitutionScreen() {
 
   const acceptInvite = async () => {
     if (!joinCode.trim() && !institutionId) {
-      Alert.alert('Enter your institution code', 'Ask your institution manager for the six-character XmiX code.');
+      Alert.alert(t('institutionCodeMissing'), t('askManagerForCode'));
       return;
     }
     if (!name.trim() || !email.trim() || !phone.trim()) {
-      Alert.alert('Add your details', 'Enter your full name, email, and phone number so your institution can recognize you.');
+      Alert.alert(t('addYourDetails'), t('detailsRequired'));
       return;
     }
     enroll.mutate(
@@ -48,10 +49,10 @@ export default function JoinInstitutionScreen() {
       {
         onSuccess: async (user) => {
           await joinInstitution(user.institutionId);
-          Alert.alert('Institution connected', 'This device is now linked to your institution workspace.');
+          Alert.alert(t('institutionConnected'), t('deviceLinked'));
           router.replace('/');
         },
-        onError: (error) => Alert.alert('Could not join institution', error instanceof Error ? error.message : 'Try again shortly.'),
+        onError: (error) => Alert.alert(t('couldNotJoin'), error instanceof Error ? error.message : t('tryAgainShortly')),
       },
     );
   };
@@ -69,17 +70,17 @@ export default function JoinInstitutionScreen() {
             onPress={() => router.back()}
             style={({ pressed }) => [styles.backButton, { backgroundColor: colors.card, opacity: pressed ? 0.7 : 1 }]}
           >
-            <Feather name="arrow-left" size={20} color={colors.foreground} />
+            <Feather name="arrow-right" size={20} color={colors.foreground} />
           </Pressable>
           <AppMark />
         </View>
 
         <>
             <View style={styles.intro}>
-              <Text style={[styles.eyebrow, { color: colors.primary }]}>JOIN YOUR INSTITUTION</Text>
-              <Text style={[styles.title, { color: colors.foreground }]}>Enter the code from your institution manager.</Text>
+       <Text style={[styles.eyebrow, { color: colors.primary }]}>{t('joinInstitution')}</Text>
+       <Text style={[styles.title, { color: colors.foreground }]}>{t('enterInstitutionCode')}</Text>
               <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-                The code links this device to the correct institution workspace. You won’t need to create a password.
+         {t('codeLinksDevice')}
               </Text>
             </View>
 
@@ -88,7 +89,7 @@ export default function JoinInstitutionScreen() {
                 <Feather name="users" size={22} color={colors.primary} />
               </View>
               <View style={styles.inviteCopy}>
-                 <Text style={[styles.inviteLabel, { color: colors.mutedForeground }]}>INSTITUTION CODE</Text>
+                  <Text style={[styles.inviteLabel, { color: colors.mutedForeground }]}>{t('institutionCode')}</Text>
                  <TextInput
                    testID="institution-code-input"
                    value={joinCode}
@@ -105,12 +106,12 @@ export default function JoinInstitutionScreen() {
             </View>
 
             <View style={styles.form}>
-              <Text style={[styles.fieldLabel, { color: colors.foreground }]}>Your details</Text>
+                 <Text style={[styles.fieldLabel, { color: colors.foreground }]}>{t('yourDetails')}</Text>
               <TextInput
                 testID="institution-join-name-input"
                 value={name}
                 onChangeText={setName}
-                placeholder="Full name"
+                 placeholder={t('fullName')}
                 placeholderTextColor={colors.mutedForeground}
                 autoCapitalize="words"
                 style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
@@ -119,7 +120,7 @@ export default function JoinInstitutionScreen() {
                 testID="institution-join-email-input"
                 value={email}
                 onChangeText={setEmail}
-                placeholder="Work email"
+                 placeholder={t('workEmail')}
                 placeholderTextColor={colors.mutedForeground}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -130,7 +131,7 @@ export default function JoinInstitutionScreen() {
                  testID="institution-join-phone-input"
                  value={phone}
                  onChangeText={setPhone}
-                 placeholder="Phone number"
+                 placeholder={t('phoneNumber')}
                  placeholderTextColor={colors.mutedForeground}
                  keyboardType="phone-pad"
                  autoComplete="tel"
@@ -144,16 +145,16 @@ export default function JoinInstitutionScreen() {
               disabled={enroll.isPending}
               style={({ pressed }) => [styles.primaryButton, { backgroundColor: colors.primary, opacity: pressed || enroll.isPending ? 0.7 : 1 }]}
             >
-              <Text style={[styles.primaryButtonText, { color: colors.primaryForeground }]}>{enroll.isPending ? 'Connecting…' : 'Join institution workspace'}</Text>
+               <Text style={[styles.primaryButtonText, { color: colors.primaryForeground }]}>{enroll.isPending ? t('connecting') : t('joinInstitutionWorkspace')}</Text>
               <Feather name={enroll.isPending ? 'loader' : 'arrow-up-right'} size={20} color={colors.primaryForeground} />
             </Pressable>
-            {enroll.error ? <Text style={[styles.errorText, { color: colors.accentForeground }]}>{enroll.error instanceof Error ? enroll.error.message : 'Could not connect to this institution.'}</Text> : null}
+            {enroll.error ? <Text style={[styles.errorText, { color: colors.accentForeground }]}>{enroll.error instanceof Error ? enroll.error.message : t('couldNotConnectInstitution')}</Text> : null}
         </>
 
         <View style={[styles.note, { borderTopColor: colors.border }]}>
           <Feather name="lock" size={16} color={colors.mutedForeground} />
           <Text style={[styles.noteText, { color: colors.mutedForeground }]}>
-            XmiX keeps your classroom photos private until you decide where to share them.
+             {t('photosPrivateUntilShare')}
           </Text>
         </View>
       </KeyboardAwareScrollViewCompat>
@@ -176,10 +177,10 @@ const styles = StyleSheet.create({
   inviteCopy: { flex: 1, gap: 5 },
   inviteLabel: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.1 },
   inviteId: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
-  codeInput: { minHeight: 34, padding: 0, fontFamily: 'Inter_700Bold', fontSize: 21, letterSpacing: 3 },
+  codeInput: { minHeight: 34, padding: 0, fontFamily: 'Inter_700Bold', fontSize: 21, letterSpacing: 3, textAlign: 'left', writingDirection: 'ltr' },
   form: { gap: 9 },
   fieldLabel: { fontFamily: 'Inter_700Bold', fontSize: 16 },
-  input: { minHeight: 52, borderWidth: 1, borderRadius: 16, paddingHorizontal: 15, fontFamily: 'Inter_400Regular', fontSize: 14 },
+  input: { minHeight: 52, borderWidth: 1, borderRadius: 16, paddingHorizontal: 15, fontFamily: 'Inter_400Regular', fontSize: 14, writingDirection: 'ltr' },
   primaryButton: { minHeight: 58, borderRadius: 18, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   primaryButtonText: { fontFamily: 'Inter_700Bold', fontSize: 16 },
   errorText: { fontFamily: 'Inter_600SemiBold', fontSize: 12, lineHeight: 17 },

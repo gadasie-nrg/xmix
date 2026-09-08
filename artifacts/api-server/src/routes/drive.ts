@@ -3,7 +3,7 @@ import { ReplitConnectors } from "@replit/connectors-sdk";
 
 const router: IRouter = Router();
 const FOLDER_MIME = "application/vnd.google-apps.folder";
-const TEMP_FOLDER_NAME = "Classroom Capture Temporary";
+const TEMP_FOLDER_NAME = "Xmix Capture Temporary";
 
 type DriveFile = {
   id: string;
@@ -103,7 +103,7 @@ router.post("/drive/upload", async (req, res) => {
     const metadata = JSON.stringify({
       name: filename.replace(/[^a-zA-Z0-9._-]/g, "_"),
       parents: [folderId],
-      description: caption?.trim() || "Captured with Classroom Capture",
+      description: caption?.trim() || "Captured with Xmix Capture",
     });
     const image = Buffer.from(base64, "base64");
     const body = Buffer.concat([

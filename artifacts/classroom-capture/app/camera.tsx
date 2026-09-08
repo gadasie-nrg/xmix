@@ -2,11 +2,18 @@ import { CameraView, useCameraPermissions, type CameraType } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ComponentType, type Ref } from 'react';
 import { ActivityIndicator, Alert, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCaptures } from '@/context/CaptureContext';
 import { useColors } from '@/hooks/useColors';
+import { t } from '@/lib/i18n';
+
+const CompatibleCameraView = CameraView as unknown as ComponentType<{
+  ref?: Ref<CameraView>;
+  style?: object;
+  facing?: CameraType;
+}>;
 
 export default function CameraScreen() {
   const router = useRouter();
@@ -27,12 +34,12 @@ export default function CameraScreen() {
     return (
       <View style={[styles.permission, { backgroundColor: colors.foreground, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={[styles.permissionIcon, { backgroundColor: colors.primary }]}><Feather name="camera" size={30} color={colors.primaryForeground} /></View>
-        <Text style={[styles.permissionTitle, { color: colors.primaryForeground }]}>Camera access keeps photos private</Text>
-        <Text style={[styles.permissionText, { color: 'rgba(255,255,255,0.7)' }]}>XmiX uses its own camera and stores photos in the app cache, never in your native gallery.</Text>
+       <Text style={[styles.permissionTitle, { color: colors.primaryForeground }]}>{t('cameraAccessPrivate')}</Text>
+       <Text style={[styles.permissionText, { color: 'rgba(255,255,255,0.7)' }]}>{t('cameraPrivacyDescription')}</Text>
         <Pressable testID="camera-permission-button" onPress={permission.canAskAgain ? requestPermission : Linking.openSettings} style={[styles.permissionButton, { backgroundColor: colors.primary }]}>
-          <Text style={[styles.permissionButtonText, { color: colors.primaryForeground }]}>{permission.canAskAgain ? 'Allow camera' : 'Open settings'}</Text>
+          <Text style={[styles.permissionButtonText, { color: colors.primaryForeground }]}>{permission.canAskAgain ? t('allowCamera') : t('openSettings')}</Text>
         </Pressable>
-        <Pressable onPress={() => router.back()}><Text style={styles.cancelText}>Not now</Text></Pressable>
+        <Pressable onPress={() => router.back()}><Text style={styles.cancelText}>{t('notNow')}</Text></Pressable>
       </View>
     );
   }
@@ -42,14 +49,14 @@ export default function CameraScreen() {
     setCapturing(true);
     try {
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.82, exif: false, skipProcessing: true });
-      if (!photo?.uri) throw new Error('The photo could not be created.');
+       if (!photo?.uri) throw new Error(t('photoCouldNotBeCreated'));
       await addCapture(photo.uri, {
         source: 'camera',
         mimeType: 'image/jpeg',
         fileName: `xmix-${Date.now()}.jpg`,
       });
     } catch (error) {
-      Alert.alert('Could not capture photo', error instanceof Error ? error.message : 'Try again.');
+       Alert.alert(t('couldNotCapture'), error instanceof Error ? error.message : t('tryAgain'));
     } finally {
       setCapturing(false);
     }
@@ -62,12 +69,12 @@ export default function CameraScreen() {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
         if (!permission.canAskAgain && Platform.OS !== 'web') {
-          Alert.alert('Photo access is off', 'Enable photo access in your device settings to import gallery photos.', [
-            { text: 'Not now', style: 'cancel' },
-            { text: 'Open settings', onPress: () => void Linking.openSettings() },
+           Alert.alert(t('photoAccessOff'), t('enablePhotoAccess'), [
+             { text: t('notNow'), style: 'cancel' },
+             { text: t('openSettings'), onPress: () => void Linking.openSettings() },
           ]);
         } else {
-          Alert.alert('Photo access needed', 'Allow photo access to import classroom photos from your gallery.');
+          Alert.alert(t('photoAccessNeeded'), t('allowPhotoAccess'));
         }
         return;
       }
@@ -85,7 +92,7 @@ export default function CameraScreen() {
       })));
       if (result.assets.length) router.replace('/review');
     } catch (error) {
-      Alert.alert('Could not import photos', error instanceof Error ? error.message : 'Try again.');
+       Alert.alert(t('couldNotImport'), error instanceof Error ? error.message : t('tryAgain'));
     } finally {
       setImporting(false);
     }
@@ -93,26 +100,26 @@ export default function CameraScreen() {
 
   return (
     <View style={styles.cameraScreen}>
-      <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing={facing} />
+      <CompatibleCameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing={facing} />
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
         <Pressable testID="close-camera-button" onPress={() => router.back()} style={styles.darkButton}><Feather name="x" size={22} color="#fff" /></Pressable>
-        <View style={styles.privacyPill}><Feather name="lock" size={12} color="#fff" /><Text style={styles.privacyPillText}>App-only photo</Text></View>
+         <View style={styles.privacyPill}><Feather name="lock" size={12} color="#fff" /><Text style={styles.privacyPillText}>{t('appOnlyPhoto')}</Text></View>
         <Pressable testID="flip-camera-button" onPress={() => setFacing((current) => current === 'back' ? 'front' : 'back')} style={styles.darkButton}><Feather name="refresh-cw" size={20} color="#fff" /></Pressable>
       </View>
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 18 }]}>
         <View style={styles.sessionRow}>
-          <Text style={styles.helperText}>{captures.length ? `${captures.length} photo${captures.length === 1 ? '' : 's'} captured` : 'Tap to capture multiple photos'}</Text>
+           <Text style={styles.helperText}>{captures.length ? t('photosCaptured', { count: captures.length }) : t('tapToCapture')}</Text>
           {captures.length ? (
             <Pressable testID="camera-done-button" onPress={() => router.replace('/review')} style={styles.doneButton}>
-              <Text style={styles.doneText}>Review</Text>
-              <Feather name="arrow-right" size={15} color="#fff" />
+               <Text style={styles.doneText}>{t('review')}</Text>
+               <Feather name="arrow-left" size={15} color="#fff" />
             </Pressable>
           ) : null}
         </View>
         <View style={styles.captureActions}>
           <Pressable testID="import-gallery-button" onPress={importFromGallery} disabled={importing} style={({ pressed }) => [styles.importButton, { opacity: pressed || importing ? 0.65 : 1 }]}>
             <Feather name="image" size={18} color="#fff" />
-            <Text style={styles.importText}>{importing ? 'Importing…' : 'Gallery'}</Text>
+             <Text style={styles.importText}>{importing ? t('importing') : t('gallery')}</Text>
           </Pressable>
           <Pressable testID="capture-button" onPress={takePhoto} disabled={capturing || importing} style={({ pressed }) => [styles.shutterOuter, { opacity: pressed || capturing || importing ? 0.72 : 1 }]}>
             <View style={styles.shutterInner} />

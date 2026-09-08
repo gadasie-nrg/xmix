@@ -1,0 +1,109 @@
+{
+  "id": "f7c08017-9133-4311-84cd-b2062cea48b2",
+  "createdAt": "2026-09-08T14:36:58.888Z",
+  "runtimeVersion": "exposdk:57.0.0",
+  "launchAsset": {
+    "key": "bundle-1788878218888-3722",
+    "contentType": "application/javascript",
+    "url": "https://c4ea7787-4938-4e52-b188-09713e11c0dd-00-1tw1nipsk5pli.sisko.replit.dev/1788878218888-3722/_expo/static/js/android/bundle.js"
+  },
+  "assets": [],
+  "metadata": {},
+  "extra": {
+    "eas": {},
+    "expoClient": {
+      "name": "XmiX",
+      "slug": "classroom-capture",
+      "version": "1.0.0",
+      "orientation": "portrait",
+      "icon": "./assets/images/classroom-capture-icon.png",
+      "scheme": "xmix",
+      "userInterfaceStyle": "automatic",
+      "ios": {
+        "supportsTablet": false
+      },
+      "android": {
+        "permissions": [
+          "android.permission.CAMERA",
+          "android.permission.RECORD_AUDIO"
+        ]
+      },
+      "web": {
+        "favicon": "./assets/images/icon.png"
+      },
+      "plugins": [
+        [
+          "expo-router",
+          {
+            "origin": "https://replit.com/"
+          }
+        ],
+        "expo-font",
+        "expo-camera",
+        "expo-web-browser",
+        [
+          "expo-splash-screen",
+          {
+            "image": "./assets/images/classroom-capture-icon.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+          }
+        ]
+      ],
+      "experiments": {
+        "typedRoutes": true,
+        "reactCompiler": true
+      },
+      "_internal": {
+        "isDebug": false,
+        "projectRoot": "/home/runner/workspace/artifacts/classroom-capture",
+        "dynamicConfigPath": {},
+        "staticConfigPath": "/home/runner/workspace/artifacts/classroom-capture/app.json",
+        "packageJsonPath": "/home/runner/workspace/artifacts/classroom-capture/package.json",
+        "pluginHistory": {
+          "expo-font": {
+            "name": "expo-font",
+            "version": "57.0.3"
+          },
+          "expo-camera": {
+            "name": "expo-camera",
+            "version": "57.0.4"
+          },
+          "expo-web-browser": {
+            "name": "expo-web-browser",
+            "version": "57.0.2"
+          },
+          "expo-splash-screen": {
+            "name": "expo-splash-screen",
+            "version": "57.0.8"
+          }
+        }
+      },
+      "sdkVersion": "57.0.0",
+      "platforms": [
+        "ios",
+        "android",
+        "web"
+      ],
+      "extra": {
+        "router": {
+          "origin": "https://replit.com/"
+        }
+      },
+      "iconUrl": "http://127.0.0.1:8081/assets/./assets/images/classroom-capture-icon.png",
+      "hostUri": "c4ea7787-4938-4e52-b188-09713e11c0dd-00-1tw1nipsk5pli.sisko.replit.dev/android"
+    },
+    "expoGo": {
+      "debuggerHost": "c4ea7787-4938-4e52-b188-09713e11c0dd-00-1tw1nipsk5pli.sisko.replit.dev/android",
+      "developer": {
+        "tool": "expo-cli",
+        "projectRoot": "/home/runner/workspace/artifacts/classroom-capture"
+      },
+      "packagerOpts": {
+        "dev": false
+      },
+      "mainModuleName": "artifacts/classroom-capture/node_modules/expo-router/entry"
+    },
+    "scopeKey": "@anonymous/classroom-capture-4ed67a1f-fab6-414f-ac5b-c2aacf1afd9f"
+  }
+}

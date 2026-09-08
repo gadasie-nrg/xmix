@@ -1,5 +1,9 @@
 - [OpenAPI/Zod compatibility](api-codegen-zod-compat.md) — keep generated numeric/email schemas on the installed Zod-compatible primitives.
 - [Artifact build environment](artifact-build-environment.md) — standalone Vite builds need each artifact's configured PORT/BASE_PATH values; managed workflows provide them automatically.
 - [Native photo sharing](native-photo-sharing.md) — stage images locally and use Expo Sharing so receiving apps receive readable FileProvider URIs.
+- [Expo device QA](expo-device-qa.md) — camera, permissions, keyboards, share sheets, and Drive require separate physical iOS/Android checks.
 - [Permanent institution codes](permanent-institution-codes.md) — each institution gets one stable join code; enrollment and invite actions must never rotate it.
 - [Metro image dimensions](metro-image-dimensions.md) — Metro passes image paths synchronously; security forks need a path-compatible adapter, not a buffer-only alias.
+- [Vitest React Native harness](vitest-react-native.md) — Node-based Expo screen tests need a React Native alias and direct React 19 test-renderer interactions.
+- [Expo workspace install state](expo-workspace-install.md) — refresh frozen workspace links before changing app code for missing Expo modules or CLI tools.
+- [Expo optional DevTools](expo-optional-devtools.md) — managed Expo previews can disable the standalone DevTools shell without changing Metro or Expo Go behavior.

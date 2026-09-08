@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { CaptureRecord } from '@/context/CaptureContext';
 import { useColors } from '@/hooks/useColors';
+import { t } from '@/lib/i18n';
 
 export function CaptureTile({
   capture,
@@ -27,7 +28,7 @@ export function CaptureTile({
       ) : (
         <View style={[styles.cleaned, { backgroundColor: colors.secondary }]}>
           <Feather name="shield" size={22} color={colors.primary} />
-          <Text style={[styles.cleanedText, { color: colors.secondaryForeground }]}>Local copy cleaned</Text>
+          <Text style={[styles.cleanedText, { color: colors.secondaryForeground }]}>{t('localCopyCleaned')}</Text>
         </View>
       )}
       <View style={[styles.status, { backgroundColor: capture.status === 'sent' ? colors.primary : colors.accent }]}>
