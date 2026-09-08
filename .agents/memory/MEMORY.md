@@ -1,0 +1,5 @@
+- [OpenAPI/Zod compatibility](api-codegen-zod-compat.md) — keep generated numeric/email schemas on the installed Zod-compatible primitives.
+- [Artifact build environment](artifact-build-environment.md) — standalone Vite builds need each artifact's configured PORT/BASE_PATH values; managed workflows provide them automatically.
+- [Native photo sharing](native-photo-sharing.md) — stage images locally and use Expo Sharing so receiving apps receive readable FileProvider URIs.
+- [Permanent institution codes](permanent-institution-codes.md) — each institution gets one stable join code; enrollment and invite actions must never rotate it.
+- [Metro image dimensions](metro-image-dimensions.md) — Metro passes image paths synchronously; security forks need a path-compatible adapter, not a buffer-only alias.
