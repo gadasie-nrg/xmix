@@ -1,0 +1,25 @@
+Create a complete system for a classroom photo-sharing service consisting of an Expo React Native mobile app for teachers and a web-based Admin Dashboard. Use Replit's internal PostgreSQL database for data storage.
+
+Part 1: Expo Mobile App (Teachers)
+1. User Types (Onboarding):
+   - School-Paid User: Joins via a Deep Link (e.g., myapp://join?schoolId=XYZ), bypasses paywalls, and links to a school license.
+   - Independent Standalone User: Downloads the app directly from the store. Can use the core features (camera & local sharing) for free without being tied to a school.
+2. Photo Acquisition (Two Options):
+   - Option A: Custom In-App Camera. Features its own built-in camera screen. Photos taken here must NOT save to the phone's native gallery (Camera Roll) for privacy reasons.
+   - Option B: Import from Device Gallery. Allow teachers to pick existing photos from their phone's native gallery using expo-image-picker. Provide a toggle/checkbox on the screen: "Delete from device gallery after successful upload". If enabled, the app should programmatically delete/request to trash those selected photos from the phone's native storage once uploaded.
+3. Temporary Storage: Instant upload of acquired photos to a designated temporary folder in the user's personal Google Drive via Google Sign-In (drive.file scope only).
+4. Sharing Dashboard & Captions: Preview screen for captured or imported images with a text input field for custom captions/descriptions. A prominent "Share" button triggers the native sharing sheet to send images + text to WhatsApp groups/contacts or Shared Drive folders.
+5. Visual Sent Status: Track shared photos locally using AsyncStorage or database sync. Display a green checkmark icon for "Sent" and a separate indicator for "Not Sent".
+6. Auto-Cleanup for App Cache: Automatically wipe local temp photo files from the app's internal device cache immediately after sharing or after a set expiration.
+
+Part 2: Web-Based Management Dashboard (React/Node.js + Replit PostgreSQL)
+1. Database Architecture: Use the internal Replit PostgreSQL database to manage users, schools, and active licenses.
+2. Role-Based Access:
+   - Super Admin (You): A master view to create new schools, manually assign license pools (e.g., School A purchased 20 seats), generate unique deep links for schools, and view total active users (both independent users and school-tied users).
+   - School Admin (Principal/Management): A clean dashboard where they can see their unique Deep Link, view how many seats are used (e.g., "14 out of 20 licenses active"), see a list of registered teachers under their school, and revoke access if a teacher leaves.
+
+Design & UI:
+- Mobile app: Simple, high-contrast UI tailored for busy teachers in a rush.
+- Web Dashboard: A clean, professional data table layout with charts for license utilization.
+Please add a small explanatory note text under the gallery delete toggle: 
+"Note: Deletion only applies to photos stored locally on this device. Photos hosted only on cloud services like Google Photos or iCloud cloud backup cannot be automatically deleted from the cloud."

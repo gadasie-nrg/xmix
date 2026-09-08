@@ -1,0 +1,520 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: XmiX private photo-sharing API for organizations
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: drive
+    description: Google Drive staging and folder operations
+  - name: admin
+    description: Institution and license administration
+  - name: mobile
+    description: User enrollment operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /drive/folders:
+    get:
+      operationId: listDriveFolders
+      tags: [drive]
+      summary: List accessible Google Drive folders
+      responses:
+        "200":
+          description: Drive folders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriveFolderList"
+  /drive/temp-folder:
+    post:
+      operationId: ensureDriveTempFolder
+      tags: [drive]
+      summary: Ensure the private temporary folder exists
+      responses:
+        "200":
+          description: Temporary folder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriveFolderResponse"
+  /drive/upload:
+    post:
+      operationId: uploadDrivePhoto
+      tags: [drive]
+      summary: Upload a temporary classroom photo to Drive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DriveUploadRequest"
+      responses:
+        "200":
+          description: Uploaded photo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriveFileResponse"
+  /admin/overview:
+    get:
+      operationId: getAdminOverview
+      tags: [admin]
+      summary: Get dashboard metrics and recent activity
+      parameters:
+        - name: role
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/AdminRole"
+        - name: institutionId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dashboard overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOverview"
+  /institutions:
+    get:
+      operationId: listInstitutions
+      tags: [admin]
+      summary: List institutions and their license utilization
+      responses:
+        "200":
+          description: Institutions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstitutionList"
+    post:
+      operationId: createInstitution
+      tags: [admin]
+      summary: Create an institution and assign its license pool
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionInput"
+      responses:
+        "201":
+          description: Created institution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institution"
+  /institutions/{institutionId}:
+    get:
+      operationId: getInstitution
+      tags: [admin]
+      summary: Get an institution
+      parameters:
+        - $ref: "#/components/parameters/InstitutionId"
+      responses:
+        "200":
+          description: Institution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institution"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateInstitution
+      tags: [admin]
+      summary: Update institution details or license pool
+      parameters:
+        - $ref: "#/components/parameters/InstitutionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionUpdate"
+      responses:
+        "200":
+          description: Updated institution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institution"
+  /institutions/{institutionId}/invite:
+    post:
+      operationId: createInstitutionInvite
+      tags: [admin]
+      summary: Return the institution's permanent join code and deep link
+      parameters:
+        - $ref: "#/components/parameters/InstitutionId"
+      responses:
+        "200":
+          description: Invite link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invite"
+  /institutions/{institutionId}/users:
+    get:
+      operationId: listInstitutionUsers
+      tags: [admin]
+      summary: List users linked to an institution
+      parameters:
+        - $ref: "#/components/parameters/InstitutionId"
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+    post:
+      operationId: enrollUser
+      tags: [mobile]
+      summary: Enroll a user into an institution workspace
+      parameters:
+        - $ref: "#/components/parameters/InstitutionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Enrolled user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "409":
+          description: No license seats available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users/{userId}/revoke:
+    post:
+      operationId: revokeUser
+      tags: [admin]
+      summary: Revoke a user's institution access
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Revoked user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /mobile/enroll:
+    post:
+      operationId: enrollMobileUser
+      tags: [mobile]
+      summary: Resolve an institution join code or legacy invite and enroll a mobile user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MobileEnrollmentInput"
+      responses:
+        "201":
+          description: Enrolled user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: No license seats available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  parameters:
+    InstitutionId:
+      name: institutionId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+    DriveFolder:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        mimeType:
+          type: string
+      required: [id, name]
+    DriveFolderList:
+      type: object
+      properties:
+        folders:
+          type: array
+          items:
+            $ref: "#/components/schemas/DriveFolder"
+      required: [folders]
+    DriveFolderResponse:
+      type: object
+      properties:
+        folder:
+          $ref: "#/components/schemas/DriveFolder"
+      required: [folder]
+    DriveUploadRequest:
+      type: object
+      properties:
+        base64:
+          type: string
+        filename:
+          type: string
+        folderId:
+          type: string
+        caption:
+          type: string
+      required: [base64, filename, folderId]
+    DriveFileResponse:
+      type: object
+      properties:
+        file:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            webViewLink:
+              type: string
+          required: [id, name]
+      required: [file]
+    AdminRole:
+      type: string
+      enum: [super_admin, institution_admin]
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+        joinCode:
+          type: string
+        name:
+          type: string
+        adminName:
+          type: string
+        adminEmail:
+          type: string
+        licenseSeats:
+          type: number
+        activeUsers:
+          type: number
+        status:
+          type: string
+          enum: [active, paused]
+        inviteUrl:
+          type: string
+        createdAt:
+          type: string
+      required: [id, joinCode, name, adminName, adminEmail, licenseSeats, activeUsers, status, inviteUrl, createdAt]
+    InstitutionInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        adminName:
+          type: string
+          minLength: 1
+        adminEmail:
+          type: string
+        licenseSeats:
+          type: number
+          minimum: 1
+      required: [name, adminName, adminEmail, licenseSeats]
+    InstitutionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        adminName:
+          type: string
+          minLength: 1
+        adminEmail:
+          type: string
+        licenseSeats:
+          type: number
+          minimum: 1
+        status:
+          type: string
+          enum: [active, paused]
+    InstitutionList:
+      type: object
+      properties:
+        institutions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Institution"
+      required: [institutions]
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        institutionId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, revoked]
+        joinedAt:
+          type: string
+        lastActiveAt:
+          type: string
+      required: [id, institutionId, name, email, phone, status, joinedAt, lastActiveAt]
+    UserInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        phone:
+          type: string
+          minLength: 7
+        deviceId:
+          type: string
+          minLength: 1
+      required: [name, email, phone, deviceId]
+    MobileEnrollmentInput:
+      type: object
+      properties:
+        institutionId:
+          type: string
+          minLength: 1
+        joinCode:
+          type: string
+          minLength: 6
+          maxLength: 8
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        phone:
+          type: string
+          minLength: 7
+        deviceId:
+          type: string
+          minLength: 1
+      required: [name, email, phone, deviceId]
+    UserList:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+      required: [users]
+    Invite:
+      type: object
+      properties:
+        institutionId:
+          type: string
+        code:
+          type: string
+        url:
+          type: string
+        createdAt:
+          type: string
+      required: [institutionId, code, url, createdAt]
+    Activity:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [user_joined, user_revoked, institution_created]
+        message:
+          type: string
+        createdAt:
+          type: string
+      required: [id, kind, message, createdAt]
+    AdminOverview:
+      type: object
+      properties:
+        role:
+          $ref: "#/components/schemas/AdminRole"
+        institution:
+          anyOf:
+            - $ref: "#/components/schemas/Institution"
+            - type: "null"
+        totalInstitutions:
+          type: number
+        totalUsers:
+          type: number
+        activeUsers:
+          type: number
+        allocatedSeats:
+          type: number
+        usedSeats:
+          type: number
+        utilizationPercent:
+          type: number
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+      required: [role, institution, totalInstitutions, totalUsers, activeUsers, allocatedSeats, usedSeats, utilizationPercent, recentActivity]
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]

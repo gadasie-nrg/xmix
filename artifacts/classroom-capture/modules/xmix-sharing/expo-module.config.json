@@ -1,0 +1,16 @@
+{
+  "platforms": [
+    "android",
+    "apple"
+  ],
+  "android": {
+    "modules": [
+      "expo.modules.xmixsharing.XmixSharingModule"
+    ]
+  },
+  "apple": {
+    "modules": [
+      "XmixSharingModule"
+    ]
+  }
+}

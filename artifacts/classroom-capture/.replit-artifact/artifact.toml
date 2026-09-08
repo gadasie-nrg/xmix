@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/"
+title = "Classroom Capture"
+description = "A privacy-first mobile camera for teachers to capture classroom moments, add captions, sync temporary copies to Google Drive, and share them with clear sent-status tracking and automatic cleanup."
+version = "1.0.0"
+id = "artifacts/classroom-capture"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/" ]
+localPort = 21689
+
+[services.development]
+run = "pnpm --filter @workspace/classroom-capture run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/classroom-capture", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/classroom-capture", "run", "serve" ]
+
+[services.env]
+PORT = "21689"
+BASE_PATH = "/"

@@ -1,0 +1,10 @@
+{
+  "name": "image-size",
+  "version": "2.0.3",
+  "private": true,
+  "main": "index.cjs",
+  "types": "index.d.ts",
+  "dependencies": {
+    "image-size-safe": "2.0.3"
+  }
+}
